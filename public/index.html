@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        .minefield {
+            line-height: 0;
+            border-spacing: 0;
+        }
+
+        .minefield td {
+            padding: 0
+        }
+    </style>
+    <script src="../js/angular.min.js"></script>
+    <script src="../js/game1.js"></script>
+</head>
+
+<body ng-app="MineSweeper">
+    <div ng-controller="ShowTimeController">
+        <a>Time: {{ showtime + 1000 | date:'mm:ss'}}</a>
+    </div>
+    <div ng-controller="MinesweeperController">
+        <table class="minefield" border="0">
+            <tr ng-repeat="row in minefield.rows">
+                <td ng-repeat="spot in row.spots" ng-mousedown="handleSpot($event, spot)">
+                    <img ng-if="spot.isCovered && !spot.isMarked" src="images/Covered.gif">
+                    <img ng-if="spot.isCovered  && spot.isMarked" src="images/CoveredMarked.gif">
+                    <img ng-if="!spot.isCovered && spot.content == 'empty'" src="images/empty.gif">
+                    <img ng-if="!spot.isCovered && spot.content == 'mine'" src="images/mine.gif">
+                    <img ng-if="!spot.isCovered && spot.content == 1" src="images/number-1.gif">
+                    <img ng-if="!spot.isCovered && spot.content == 2" src="images/number-2.gif">
+                    <img ng-if="!spot.isCovered && spot.content == 3" src="images/number-3.gif">
+                    <img ng-if="!spot.isCovered && spot.content == 4" src="images/number-4.gif">
+                    <img ng-if="!spot.isCovered && spot.content == 5" src="images/number-5.gif">
+                    <img ng-if="!spot.isCovered && spot.content == 6" src="images/number-6.gif">
+                    <img ng-if="!spot.isCovered && spot.content == 7" src="images/number-7.gif">
+                    <img ng-if="!spot.isCovered && spot.content == 8" src="images/number-8.gif">
+                </td>
+            </tr>
+        </table>
+        <h3 ng-if="isWinMessageVisible">{{ timer }}</h3>
+        <h3 ng-if="isLostMessageVisible">You lost!</h3>
+        <h3 ng-if="isWinMessageVisible != true">Number of mines: {{ mines }} Marked mines: {{ marked }} Mines left: {{ mines - marked }}</h3>
+    </div>
+</body>
+
+</html>
