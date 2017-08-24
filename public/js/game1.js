@@ -1,27 +1,56 @@
 
 app = angular.module('MineSweeper', []);
-
+/*
 app.controller('ShowTimeController', ['$scope', '$interval', function($scope, $interval){
-    $scope.showtime = -1;
-    $scope.clock = $interval(tick, 1000);
+    $scope.go = -1;
+    $scope.showtime = 0;
+ 
     var tick = function() {
-        if($scope.showtime != -1){
+        if($scope.go != -1){
             $scope.showtime = $scope.showtime + 1000;
         }
-    }
-    tick();
+    };
     $interval(tick, 1000);
 }]);
+*/
 
-app.controller('MinesweeperController', ['$scope', function ($scope) {
+app.controller('MinesweeperController', ['$scope', '$interval', function ($scope, $interval) {
     $scope.minefield = createMineField();
     $scope.marked = getMarked($scope.minefield);
     $scope.mines = getMines($scope.minefield);
     $scope.isLostMessageVisible = false;
-    $scope.isWonMessageVisible = false;
+    $scope.isWinMessageVisible = false;
+
+
+
+    $scope.go = false;
+    $scope.showtime = 0;
+    $scope.stoptime = 0;
+    var tick = function () {
+        if ($scope.go) {
+            $scope.showtime = Date.now() - $scope.gotime;
+            $scope.stoptime = $scope.showtime
+        } else {
+            $scope.showtime = $scope.stoptime
+        }
+    };
+    $interval(tick, 100);
+
+    function startClock() {
+        if (!$scope.go) {
+            $scope.gotime = Date.now();
+            $scope.go = true;
+        }
+    }
+
+    function stopClock(){
+        if ($scope.go) {
+            $scope.go = false;
+        }
+    }
 
     $scope.handleSpot = function (event, spot) {
-        if ($scope.isLostMessageVisible == false) {
+        if ($scope.isLostMessageVisible == false && $scope.isWinMessageVisible == false) {
             if (event.button == 1) {
                 if (spot.isCovered) {
                     if (spot.isMarked) {
@@ -35,11 +64,14 @@ app.controller('MinesweeperController', ['$scope', function ($scope) {
             } else if (event.button == 0 && !spot.isMarked) {
                 spot.isCovered = false;
                 startTime($scope.minefield);
-                $scope.showtime = 0;
+                startClock();
                 if (spot.content == "mine") {
+                    stopClock();
+                    revealAll($scope.minefield);
                     $scope.isLostMessageVisible = true;
                 } else {
                     if (hasWon($scope.minefield)) {
+                        stopClock();
                         $scope.timer = calcTime($scope.minefield);
                         $scope.isWinMessageVisible = true;
                     }
@@ -55,10 +87,10 @@ function createMineField() {
     var minefield = {};
     minefield.rows = [];
     minefield.starttime = 0;     //Date.now();
-    minefield.mines = 10;
+    minefield.mines = 22;
     minefield.marked = 0;
-    minefield.gamerows = 9;
-    minefield.gamecols = 9;
+    minefield.gamerows = 8;
+    minefield.gamecols = 18;
 
     for (var i = 0; i < minefield.gamerows; i++) {  //row
         var row = {};
@@ -234,6 +266,7 @@ function startTime(minefield) {
     if (minefield.starttime == 0) {
         minefield.starttime = Date.now();
     }
+
 }
 
 function calcTime(minefield) {
@@ -247,6 +280,15 @@ function calcTime(minefield) {
         return "You won!       Time: " + minutes + " minute and " + seconds + " seconds";
     } else {
         return "You won!       Time: " + minutes + " minutes and " + seconds + " seconds";
+    }
+}
+
+function revealAll(minefield){
+    for (var y = 0; y < minefield.gamecols; y++) {  //col
+        for (var x = 0; x < minefield.gamerows; x++) {  //row
+            var spot = getSpot(minefield, x, y);
+           spot.isCovered = false;
+        }
     }
 }
 
