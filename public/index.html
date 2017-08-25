@@ -22,18 +22,18 @@
         <table class="minefield" border="0">
             <tr ng-repeat="row in minefield.rows">
                 <td ng-repeat="spot in row.spots" ng-mousedown="handleSpot($event, spot)">
-                    <img ng-if="spot.isCovered && !spot.isMarked" src="images/Covered.gif">
-                    <img ng-if="spot.isCovered  && spot.isMarked" src="images/CoveredMarked.gif">
-                    <img ng-if="!spot.isCovered && spot.content == 'empty'" src="images/empty.gif">
-                    <img ng-if="!spot.isCovered && spot.content == 'mine'" src="images/mine.gif">
-                    <img ng-if="!spot.isCovered && spot.content == 1" src="images/number-1.gif">
-                    <img ng-if="!spot.isCovered && spot.content == 2" src="images/number-2.gif">
-                    <img ng-if="!spot.isCovered && spot.content == 3" src="images/number-3.gif">
-                    <img ng-if="!spot.isCovered && spot.content == 4" src="images/number-4.gif">
-                    <img ng-if="!spot.isCovered && spot.content == 5" src="images/number-5.gif">
-                    <img ng-if="!spot.isCovered && spot.content == 6" src="images/number-6.gif">
-                    <img ng-if="!spot.isCovered && spot.content == 7" src="images/number-7.gif">
-                    <img ng-if="!spot.isCovered && spot.content == 8" src="images/number-8.gif">
+                    <img ng-if="spot.isCovered && !spot.isMarked" src="images/Covered.gif" height="32" width="32">
+                    <img ng-if="spot.isCovered  && spot.isMarked" src="images/CoveredMarked.gif" height="32" width="32">
+                    <img ng-if="!spot.isCovered && spot.content == 'empty'" src="images/empty.gif" height="32" width="32">
+                    <img ng-if="!spot.isCovered && spot.content == 'mine'" src="images/mine.gif" height="32" width="32">
+                    <img ng-if="!spot.isCovered && spot.content == 1" src="images/number-1.gif" height="32" width="32">
+                    <img ng-if="!spot.isCovered && spot.content == 2" src="images/number-2.gif" height="32" width="32">
+                    <img ng-if="!spot.isCovered && spot.content == 3" src="images/number-3.gif" height="32" width="32">
+                    <img ng-if="!spot.isCovered && spot.content == 4" src="images/number-4.gif" height="32" width="32">
+                    <img ng-if="!spot.isCovered && spot.content == 5" src="images/number-5.gif" height="32" width="32">
+                    <img ng-if="!spot.isCovered && spot.content == 6" src="images/number-6.gif" height="32" width="32">
+                    <img ng-if="!spot.isCovered && spot.content == 7" src="images/number-7.gif" height="32" width="32">
+                    <img ng-if="!spot.isCovered && spot.content == 8" src="images/number-8.gif" height="32" width="32">
                 </td>
             </tr>
         </table>

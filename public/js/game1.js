@@ -43,14 +43,14 @@ app.controller('MinesweeperController', ['$scope', '$interval', function ($scope
         }
     }
 
-    function stopClock(){
+    function stopClock() {
         if ($scope.go) {
             $scope.go = false;
         }
     }
 
     $scope.handleSpot = function (event, spot) {
-        if ($scope.isLostMessageVisible == false && $scope.isWinMessageVisible == false) {
+        if (true || ($scope.isLostMessageVisible == false && $scope.isWinMessageVisible == false)) {
             if (event.button == 1) {
                 if (spot.isCovered) {
                     if (spot.isMarked) {
@@ -62,7 +62,7 @@ app.controller('MinesweeperController', ['$scope', '$interval', function ($scope
                     }
                 }
             } else if (event.button == 0 && !spot.isMarked) {
-                spot.isCovered = false;
+                clearEmptySpace($scope.minefield, spot.ro, spot.co); // co, ro
                 startTime($scope.minefield);
                 startClock();
                 if (spot.content == "mine") {
@@ -87,10 +87,10 @@ function createMineField() {
     var minefield = {};
     minefield.rows = [];
     minefield.starttime = 0;     //Date.now();
-    minefield.mines = 22;
+    minefield.mines = 90;
     minefield.marked = 0;
-    minefield.gamerows = 8;
-    minefield.gamecols = 18;
+    minefield.gamerows = 18;
+    minefield.gamecols = 36;
 
     for (var i = 0; i < minefield.gamerows; i++) {  //row
         var row = {};
@@ -98,6 +98,8 @@ function createMineField() {
 
         for (var j = 0; j < minefield.gamecols; j++) {  //col
             var spot = {};
+            spot.co = j;
+            spot.ro = i;
             spot.isCovered = true;
             spot.isMarked = false;
             spot.content = "empty";
@@ -283,12 +285,56 @@ function calcTime(minefield) {
     }
 }
 
-function revealAll(minefield){
+// Visar alla minor
+function revealAll(minefield) {
     for (var y = 0; y < minefield.gamecols; y++) {  //col
         for (var x = 0; x < minefield.gamerows; x++) {  //row
             var spot = getSpot(minefield, x, y);
-           spot.isCovered = false;
+            if (spot.content == 'mine') {
+                spot.isCovered = false;
+            }
         }
     }
 }
 
+
+//Rensa alla covered om 
+function clearEmptySpace(minefield, x, y) {
+    var maxX = minefield.gamerows;
+    var maxY = minefield.gamecols;
+
+    var clearAll = function (minefield, x, y, maxX, maxY, level, maxlevel) {
+        var spot;
+        level++;
+        if (level > maxlevel) maxlevel = level;
+        spot = getSpot(minefield, x, y);
+        if (!spot.isMarked) {
+            spot.isCovered = false;
+            if (spot.content == 'empty') {
+                for (var yy = -1, cy = 2; yy < cy; yy++) {
+                    for (var xx = -1, cx = 2; xx < cx; xx++) {
+                        if (x + xx >= 0 && x + xx < maxX && y + yy >= 0 && y + yy < maxY && (xx != 0 || yy != 0)) {
+                            var spot2 = getSpot(minefield, x + xx, y + yy);
+                            if (!spot2.isMarked) {
+                                if (spot2.content != 'mine' && spot2.isCovered) {
+                                    spot2.isCovered = false;
+                                    if (spot2.content == 'empty') {
+                                        maxlevel = clearAll(minefield, x + xx, y + yy, maxX, maxY, level, maxlevel);
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return maxlevel;
+    };
+
+    var spot = getSpot(minefield, x, y);
+    if (spot.isCovered || spot.content == 'empty') {
+        maxlevel = clearAll(minefield, x, y, maxX, maxY, 0, 0);
+        if (maxlevel > 100) alert(maxlevel);
+    }
+}
