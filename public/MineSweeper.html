@@ -18,8 +18,8 @@
 
 <body ng-app="MineSweeper">
     <div ng-controller="MinesweeperController">
-        <h3>Time: {{ showtime | date:'mm:ss'}}</h3>
-        <table class="minefield" border="0">
+        <h3>Time: <% showtime | date:'mm:ss' %> </h3>
+        <table class="minefield" border="0" oncontextmenu="return false;">
             <tr ng-repeat="row in minefield.rows">
                 <td ng-repeat="spot in row.spots" ng-mousedown="handleSpot($event, spot)">
                     <img ng-if="spot.isCovered && !spot.isMarked" src="images/Covered.gif" height="32" width="32">
@@ -39,9 +39,9 @@
         </table>
         <br>
         <form action=""><input type="submit" value="Restart"></form>
-        <h3 ng-if="isWinMessageVisible">{{ timer }}</h3>
+        <h3 ng-if="isWinMessageVisible"><% timer %></h3>
         <h3 ng-if="isLostMessageVisible">You lost!</h3>
-        <h3 ng-if="isWinMessageVisible != true">Number of mines: {{ mines }} Marked mines: {{ marked }} Mines left: {{ mines - marked }}</h3>
+        <h3 ng-if="isWinMessageVisible != true">Number of mines: <% mines %> Marked mines: <% marked %> Mines left: <% mines - marked %></h3>
         
     </div>
 </body>
