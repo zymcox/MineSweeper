@@ -1,24 +1,60 @@
 
 app = angular.module('MineSweeper', []);
 
-app.config(function ($interpolateProvider) {
+app.config(function ($interpolateProvider, $httpProvider) {
     $interpolateProvider.startSymbol('<%');
     $interpolateProvider.endSymbol('%>');
-  });
-  
-app.controller('MinesweeperController', ['$scope', '$interval', function ($scope, $interval) {
-   
+    $httpProvider.defaults.headers.common["X-Requested-With"] = "XMLHttpRequest"
+});
+
+
+
+app.factory('Score', function ($http) {
+    return {
+        get: function () {
+            return $http.get('/api/hiscore');
+        },
+
+        save: function (showtime) {
+            return $http({
+                method: 'POST',
+                url: '/api/hiscore',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                data: $.param(showtime)
+            });
+        },
+
+    }
+});
+
+app.controller('MinesweeperController', ['$scope', '$interval', '$http', 'Score', function ($scope, $interval, $http, Score) {
+
     $scope.minefield = createMineField();
     $scope.marked = getMarked($scope.minefield);
     $scope.mines = getMines($scope.minefield);
     $scope.isLostMessageVisible = false;
     $scope.isWinMessageVisible = false;
 
-
-
     $scope.go = false;
     $scope.showtime = 0;
     $scope.stoptime = 0;
+    $scope.hiscorelist = {};
+    //$scope.htmlhiscorelist = '';
+
+    Score.get().then(function (data) {
+
+        alert(JSON.stringify(data.data));
+        data.data.push(row);
+       
+    });
+
+
+
+
+
     var tick = function () {
         if ($scope.go) {
             $scope.showtime = Date.now() - $scope.gotime;
@@ -72,6 +108,11 @@ app.controller('MinesweeperController', ['$scope', '$interval', function ($scope
             }
         }
     };
+
+    showHiscoreList($scope);
+
+
+
 }]);
 
 
@@ -80,7 +121,7 @@ function createMineField() {
     var minefield = {};
     minefield.rows = [];
     minefield.starttime = 0;     //Date.now();
-    minefield.mines = 50;
+    minefield.mines = 15;
     minefield.marked = 0;
     minefield.gamerows = 16;
     minefield.gamecols = 26;
@@ -107,6 +148,18 @@ function createMineField() {
 
     return minefield;
 };
+
+function showHiscoreList($scope) {
+    $scope.htmlhiscorelist = 'test' + ': ' + '77:99\n ' + 'test' + ': ' + '77:99\n ' + 'test' + ': ' + '77:99\n ';
+    //alert(1);
+
+    for (var item in $scope.hiscorelist) {
+
+        alert(8);
+        $scope.htmlhiscorelist = $scope.htmlhiscorelist + '<div class="row"><h4>' + item.name + ': ' + item.time + '</h4></div>';
+
+    }
+}
 
 function getMines(minefield) {
     return minefield.mines;
@@ -268,14 +321,12 @@ function calcTime(minefield) {
     var milliseconds = Date.now();
     var seconds = 0;
     var minutes = 0;
-    var sec = Math.round((milliseconds - minefield.starttime) / 100) / 10;
+    var sec = Math.round((milliseconds - minefield.starttime) / 1000);
     minutes = Math.floor(sec / 60.0);
     seconds = Math.round((sec / 60 - minutes) * 600.0) / 10;
-    if (minutes == 1) {
-        return "You won!       Time: " + minutes + " minute and " + seconds + " seconds";
-    } else {
-        return "You won!       Time: " + minutes + " minutes and " + seconds + " seconds";
-    }
+
+    return "You won!   Time: " + minutes + ":" + seconds;
+
 }
 
 // Visar alla minor
@@ -297,8 +348,7 @@ function clearEmptySpace(minefield, x, y) {
     var maxY = minefield.gamecols;
 
     var clearAll = function (minefield, x, y, maxX, maxY) {
-        var spot;
-        spot = getSpot(minefield, x, y);
+        var spot = getSpot(minefield, x, y);
         if (!spot.isMarked) {
             spot.isCovered = false;
             if (spot.content == 'empty') {
@@ -323,6 +373,6 @@ function clearEmptySpace(minefield, x, y) {
 
     var spot = getSpot(minefield, x, y);
     if (spot.isCovered || spot.content == 'empty') {
-       clearAll(minefield, x, y, maxX, maxY);
+        clearAll(minefield, x, y, maxX, maxY);
     }
 }

@@ -85,8 +85,8 @@
     </div>
 
     <!-- Scripts -->
-    <script src="{{ asset('js/app.js') }}"></script>
-    <script src="../js/angular.min.js"></script>
-    <script src="../js/game1.js"></script>
+    <script type="application/javascript" src="{{ asset('js/app.js') }}"></script>
+    <script type="application/javascript" src="../js/angular.min.js"></script>
+    <script type="application/javascript" src="../js/game1.js"></script>
 </body>
 </html>

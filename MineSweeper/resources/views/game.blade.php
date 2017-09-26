@@ -1,11 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
-    <div class="row">
+<div class="container" ng-app="MineSweeper">
+    <div class="row" ng-controller="MinesweeperController">
         <div class="col-lg-9">
-            <div ng-app="MineSweeper">
-                <div ng-controller="MinesweeperController">
+            <div >
+                <div >
                     <div class="row">
                         
                         <div class="col-lg-4">
@@ -13,7 +13,14 @@
                         </div>
                         <div class=col-lg-8>
                             <div class="col-lg-12">
-                                <h3><form action=""><input class="btn btn-success pull-right" type="submit" value="Restart" ></form></h3>
+                                <h3>
+                                    <form method="POST" action="/game">
+                                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                                        <input type="hidden" name="time" value="<% showtime | date:'mm:ss' %>">
+                                        <input type="hidden" name="won" value="<% isWinMessageVisible %>">
+                                        <input type="submit" class="btn btn-success pull-right" value="Restart" >
+                                    </form>
+                                </h3>
                             </div>
                         </div>
                     </div>
@@ -49,13 +56,10 @@
 
         <div class="col-md-3">
             <div class="row">
-                <h3>Hiscore:</h3>
+                <h3>Best times:</h3>
             </div>
-            <div class="row">
-                <h4>Phiddelie: 00:07:32</h4>
-            </div>
-            <div class="row">
-                <h4>Uffe: 00:08:43</h4>
+            <div class="row" ng-repeat="item in MinesweeperController.hiscorelist">
+                <h4><% item.name  item.time %></h4>
             </div>
         </div>
     </div>

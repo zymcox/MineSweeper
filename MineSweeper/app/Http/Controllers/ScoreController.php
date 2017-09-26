@@ -3,11 +3,12 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+//use Illuminate\Http\Response;
 use App\HiScore;
 use App\User;
 use Auth;
 
-class GameController extends Controller
+class ScoreController extends Controller
 {
     /**
      * Create a new controller instance.
@@ -33,8 +34,8 @@ class GameController extends Controller
         ->take(12)
         ->getQuery()
         ->get();
-
-        return view('game', ['hiscorelist' => Array()]);
+        
+        return ['hiscorelist' => $hiscores];
     }
 
     public function store(Request $req)
@@ -46,8 +47,8 @@ class GameController extends Controller
             $user_id = Auth::id();
             HiScore::create(['time' => $time, 'user_id' => $user_id]);
         }
-
-        //hämta hiscorelistan från databasen
+        
+        //Hämta nya hiscore
         $hiscores = HiScore::join('users', 'users.id', '=', 'hi_scores.user_id')
         ->orderBy('time')
         ->select('name', 'time')
@@ -55,6 +56,6 @@ class GameController extends Controller
         ->getQuery()
         ->get();
 
-        return view('game', ['hiscorelist' => Array()]);
+        return ['hiscorelist' => $hiscores];
     }
 }

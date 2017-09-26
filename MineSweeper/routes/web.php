@@ -17,5 +17,13 @@ Route::get('/', function () {
 
 Auth::routes();
 
-Route::get('/home', 'HomeController@index')->name('home');
+//Route::get('/home', 'HomeController@index')->name('home');
+
 Route::get('/game', 'GameController@index')->name('game');
+Route::post('/game', 'GameController@store')->name('whatever');
+
+
+Route::group(array('prefix' => 'api'), function () {
+    Route::resource('hiscore', 'ScoreController',
+        array('only' => array('index', 'store')));
+});
