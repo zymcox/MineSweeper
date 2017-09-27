@@ -41,19 +41,32 @@ app.controller('MinesweeperController', ['$scope', '$interval', '$http', 'Score'
     $scope.go = false;
     $scope.showtime = 0;
     $scope.stoptime = 0;
-    $scope.hiscorelist = {};
-    //$scope.htmlhiscorelist = '';
+    $scope.hiscorelist = [];
+
 
     Score.get().then(function (data) {
-
-        alert(JSON.stringify(data.data));
-        data.data.push(row);
-       
+        $scope.hiscorelist = data.data;
     });
 
+    $scope.saveHiscores = function () {
+        alert('saving');
+        Score.save($scope.showtime).then(function (data) {
 
-
-
+            Score.get().then(function (data) {
+                $scope.hiscorelist = data;
+            });
+        });
+        error(function(data) {
+            console.log(data);
+        });
+    }
+    
+    $scope.hiscorelist.push(
+        {
+            name: hiscorelist.name,
+            hiscore: hiscorelist.time
+        }
+    );
 
     var tick = function () {
         if ($scope.go) {
@@ -102,14 +115,18 @@ app.controller('MinesweeperController', ['$scope', '$interval', '$http', 'Score'
                     if (hasWon($scope.minefield)) {
                         stopClock();
                         $scope.timer = calcTime($scope.minefield);
+                        // Addera ny hiscore här
+                        //$http.save('/api/score'); //funkar inte
                         $scope.isWinMessageVisible = true;
+
+                        //showHiscoreList($scope);
                     }
                 }
             }
         }
     };
 
-    showHiscoreList($scope);
+
 
 
 
@@ -150,13 +167,13 @@ function createMineField() {
 };
 
 function showHiscoreList($scope) {
-    $scope.htmlhiscorelist = 'test' + ': ' + '77:99\n ' + 'test' + ': ' + '77:99\n ' + 'test' + ': ' + '77:99\n ';
-    //alert(1);
+    var htmlhiscorelist = 'test' + ': ' + '77:99\n ' + 'test' + ': ' + '77:99\n ' + 'test' + ': ' + '77:99\n ';
+    alert(1);
 
     for (var item in $scope.hiscorelist) {
 
         alert(8);
-        $scope.htmlhiscorelist = $scope.htmlhiscorelist + '<div class="row"><h4>' + item.name + ': ' + item.time + '</h4></div>';
+        htmlhiscorelist = htmlhiscorelist + '<div class="row"><h4>' + item.name + ': ' + item.time + '</h4></div>';
 
     }
 }

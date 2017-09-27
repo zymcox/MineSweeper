@@ -58,8 +58,8 @@
             <div class="row">
                 <h3>Best times:</h3>
             </div>
-            <div class="row" ng-repeat="item in MinesweeperController.hiscorelist">
-                <h4><% item.name  item.time %></h4>
+            <div class="row" ng-repeat="row in hiscorelist">
+                <h4><% row.name  row.time %></h4>
             </div>
         </div>
     </div>

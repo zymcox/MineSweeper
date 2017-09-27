@@ -27,6 +27,7 @@ class ScoreController extends Controller
      */
     public function index()
     {
+
         //hämta hiscorelistan från databasen först
         $hiscores = HiScore::join('users', 'users.id', '=', 'hi_scores.user_id')
         ->orderBy('time')
@@ -34,12 +35,14 @@ class ScoreController extends Controller
         ->take(12)
         ->getQuery()
         ->get();
-        
+        dd($hiscores);
+
         return ['hiscorelist' => $hiscores];
     }
 
     public function store(Request $req)
     {
+        dd($req);
         //lägg till ny hiscore
         if (request('won') == 'true') {
             $time = request('time');

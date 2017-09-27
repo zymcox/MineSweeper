@@ -33,12 +33,13 @@ class GameController extends Controller
         ->take(12)
         ->getQuery()
         ->get();
-
+       
         return view('game', ['hiscorelist' => Array()]);
     }
 
     public function store(Request $req)
     {
+       
         //lägg till ny hiscore
         if (request('won') == 'true') {
             $time = request('time');
