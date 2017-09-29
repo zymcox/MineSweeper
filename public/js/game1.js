@@ -7,15 +7,13 @@ app.config(function ($interpolateProvider, $httpProvider) {
     $httpProvider.defaults.headers.common["X-Requested-With"] = "XMLHttpRequest"
 });
 
-
-
 app.factory('Score', function ($http) {
     return {
         get: function () {
             return $http.get('/api/hiscore');
         },
 
-        save: function (showtime) {
+        save: function (s) {
             return $http({
                 method: 'POST',
                 url: '/api/hiscore',
@@ -23,7 +21,9 @@ app.factory('Score', function ($http) {
                     'Content-Type': 'application/x-www-form-urlencoded',
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
-                data: $.param(showtime)
+                data: $.param({
+                    time: s
+                })
             });
         },
 
@@ -40,33 +40,28 @@ app.controller('MinesweeperController', ['$scope', '$interval', '$http', 'Score'
 
     $scope.go = false;
     $scope.showtime = 0;
+    $scope.showtimestr = "";
     $scope.stoptime = 0;
     $scope.hiscorelist = [];
 
-
+    // Ajax anropet fungerar
     Score.get().then(function (data) {
-        $scope.hiscorelist = data.data;
+        $scope.hiscorelist = data.data.hiscorelist;
     });
 
     $scope.saveHiscores = function () {
-        alert('saving');
-        Score.save($scope.showtime).then(function (data) {
-
-            Score.get().then(function (data) {
-                $scope.hiscorelist = data;
-            });
-        });
-        error(function(data) {
-            console.log(data);
-        });
-    }
-    
-    $scope.hiscorelist.push(
-        {
-            name: hiscorelist.name,
-            hiscore: hiscorelist.time
-        }
-    );
+        var d = new Date($scope.showtime);
+        var mi = "0" + d.getMinutes();
+        var se = "0" + d.getSeconds();
+        $scope.showtimestr = mi.substr(-2) + ':' + se.substr(-2);
+        //alert($scope.showtimestr);
+        Score.save($scope.showtimestr)
+            .then(function (data) {
+                Score.get().then(function (data) {
+                    $scope.hiscorelist = data.data.hiscorelist;
+                });
+            })
+    };
 
     var tick = function () {
         if ($scope.go) {
@@ -103,7 +98,7 @@ app.controller('MinesweeperController', ['$scope', '$interval', '$http', 'Score'
                         $scope.marked = addMarked($scope.minefield);
                     }
                 }
-            } else if (event.button == 0 && !spot.isMarked) {
+            } else if (event.button == 0 && !spot.isMarked && spot.isCovered) {
                 clearEmptySpace($scope.minefield, spot.ro, spot.co);
                 startTime($scope.minefield);
                 startClock();
@@ -115,30 +110,58 @@ app.controller('MinesweeperController', ['$scope', '$interval', '$http', 'Score'
                     if (hasWon($scope.minefield)) {
                         stopClock();
                         $scope.timer = calcTime($scope.minefield);
-                        // Addera ny hiscore här
-                        //$http.save('/api/score'); //funkar inte
+                        $scope.saveHiscores();
                         $scope.isWinMessageVisible = true;
+                    }
+                }
+            } else if (event.button == 0 && !spot.isCovered) {
+                //Kolla runt tryckt spot finns inga minor där uncover spots Kolla inte markerade
+                var sp;
+                var mineFound = false;
+                var maxX = $scope.minefield.gamecols;
+                var maxY = $scope.minefield.gamerows;
+                var x = spot.co;
+                var y = spot.ro;
 
-                        //showHiscoreList($scope);
+                for (var xx = -1; xx < 2; xx++) {
+                    for (var yy = -1; yy < 2; yy++) {
+                        if (x + xx >= 0 && x + xx < maxX && y + yy >= 0 && y + yy < maxY && (xx != 0 || yy != 0)) {
+                            sp = getSpot($scope.minefield, y + yy, x + xx);
+                            if (sp.content == 'mine' && !sp.isMarked) mineFound = true;
+                        }
+                    }
+                }
+                if (!mineFound) {
+                    for (var xx = -1; xx < 2; xx++) {
+                        for (var yy = -1; yy < 2; yy++) {
+                            if (x + xx >= 0 && x + xx < maxX && y + yy >= 0 && y + yy < maxY && (xx != 0 || yy != 0)) {
+                                sp = getSpot($scope.minefield, y + yy, x + xx);
+                                if (!sp.isMarked){
+                                     clearEmptySpace($scope.minefield, sp.ro, sp.co);
+                                     startTime($scope.minefield);
+                                     startClock();
+                                     if (hasWon($scope.minefield)) {
+                                        stopClock();
+                                        $scope.timer = calcTime($scope.minefield);
+                                        $scope.saveHiscores();
+                                        $scope.isWinMessageVisible = true;
+                                        exit;
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
     };
-
-
-
-
-
 }]);
-
-
 
 function createMineField() {
     var minefield = {};
     minefield.rows = [];
     minefield.starttime = 0;     //Date.now();
-    minefield.mines = 15;
+    minefield.mines = 75;
     minefield.marked = 0;
     minefield.gamerows = 16;
     minefield.gamecols = 26;
@@ -146,7 +169,6 @@ function createMineField() {
     for (var i = 0; i < minefield.gamerows; i++) {  //row
         var row = {};
         row.spots = [];
-
         for (var j = 0; j < minefield.gamecols; j++) {  //col
             var spot = {};
             spot.co = j;
@@ -156,7 +178,6 @@ function createMineField() {
             spot.content = "empty";
             row.spots.push(spot);
         }
-
         minefield.rows.push(row);
     }
     placeManyRandomMines(minefield);
@@ -165,18 +186,6 @@ function createMineField() {
 
     return minefield;
 };
-
-function showHiscoreList($scope) {
-    var htmlhiscorelist = 'test' + ': ' + '77:99\n ' + 'test' + ': ' + '77:99\n ' + 'test' + ': ' + '77:99\n ';
-    alert(1);
-
-    for (var item in $scope.hiscorelist) {
-
-        alert(8);
-        htmlhiscorelist = htmlhiscorelist + '<div class="row"><h4>' + item.name + ': ' + item.time + '</h4></div>';
-
-    }
-}
 
 function getMines(minefield) {
     return minefield.mines;
@@ -342,7 +351,7 @@ function calcTime(minefield) {
     minutes = Math.floor(sec / 60.0);
     seconds = Math.round((sec / 60 - minutes) * 600.0) / 10;
 
-    return "You won!   Time: " + minutes + ":" + seconds;
+    return "You won!";
 
 }
 
